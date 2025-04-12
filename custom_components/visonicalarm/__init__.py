@@ -27,6 +27,8 @@ CONF_USER_PASSWORD = 'user_password'
 CONF_PANEL_ID = 'panel_id'
 CONF_PARTITION = 'partition'
 CONF_EVENT_HOUR_OFFSET = 'event_hour_offset'
+CONF_MAX_RETRIES = 'max_retries'
+CONF_RETRY_BACKOFF = 'retry_backoff'
 
 STATE_ATTR_SYSTEM_NAME = 'system_name'
 STATE_ATTR_SYSTEM_SERIAL_NUMBER = 'serial_number'
@@ -54,6 +56,8 @@ CONFIG_SCHEMA = vol.Schema({
         vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
         vol.Optional(CONF_NO_PIN_REQUIRED, default=False): cv.boolean,
         vol.Optional(CONF_EVENT_HOUR_OFFSET, default=0): vol.All(vol.Coerce(int), vol.Range(min=-24, max=24)),
+        vol.Optional(CONF_MAX_RETRIES, default=20): vol.All(vol.Coerce(int), vol.Range(min=-0, max=100)),
+        vol.Optional(CONF_RETRY_BACKOFF, default=0.1): vol.All(vol.Coerce(float), vol.Range(min=-0.1, max=1)),
     }),
 }, extra=vol.ALLOW_EXTRA)
 
@@ -93,7 +97,9 @@ class VisonicAlarmHub(Entity):
                                          domain_config[CONF_USER_EMAIL],
                                          domain_config[CONF_USER_PASSWORD],
                                          domain_config[CONF_PANEL_ID],
-                                         domain_config[CONF_PARTITION])
+                                         domain_config[CONF_PARTITION],
+                                         domain_config[CONF_MAX_RETRIES],
+                                         domain_config[CONF_RETRY_BACKOFF])
 
     def connect(self):
         """ Setup a connection to the Visonic API server. """
