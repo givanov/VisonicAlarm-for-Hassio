@@ -12,12 +12,6 @@ import homeassistant.components.persistent_notification as pn
 from homeassistant.const import (
     ATTR_CODE_FORMAT,
     EVENT_STATE_CHANGED,
-    # STATE_ALARM_ARMED_AWAY,
-    # STATE_ALARM_ARMED_HOME,
-    # STATE_ALARM_ARMING,
-    # STATE_ALARM_DISARMED,
-    # STATE_ALARM_PENDING,
-    # STATE_ALARM_TRIGGERED,
     STATE_UNKNOWN,
 )
 
