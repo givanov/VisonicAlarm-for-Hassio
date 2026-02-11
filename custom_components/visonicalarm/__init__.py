@@ -119,7 +119,7 @@ class VisonicAlarmHub(Entity):
     def update(self):
         """ Update all alarm statuses. """
         try:
-            if self.alarm.is_token_valid == False:
+            if not self.alarm.is_token_valid():
                 self.alarm.connect()
             
             self.alarm.update_status()
