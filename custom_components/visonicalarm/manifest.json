@@ -2,7 +2,7 @@
   "domain": "visonicalarm",
   "name": "Visonic/Bentel/Tyco Alarm System",
   "documentation": "https://github.com/givanov/VisonicAlarm-for-Hassio",
-  "version": "v1.1.2",
+  "version": "v1.3.0",
   "requirements": [
     "git+https://github.com/givanov/VisonicAlarm2.git@1.1.2#visonicalarm2",
     "python-dateutil==2.7.3"
