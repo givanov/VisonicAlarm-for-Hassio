@@ -15,7 +15,7 @@ from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
 import homeassistant.helpers.config_validation as cv
 
-REQUIREMENTS = ['visonicalarm2@git+https://github.com/givanov/VisonicAlarm2.git>=1.1.2', 'python-dateutil==2.7.3']
+REQUIREMENTS = ['visonicalarm2@git+https://github.com/givanov/VisonicAlarm2.git>=1.1.5', 'python-dateutil==2.7.3']
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -119,19 +119,20 @@ class VisonicAlarmHub(Entity):
     def update(self):
         """ Update all alarm statuses. """
         try:
-            if not self.alarm.is_token_valid:
-                self.alarm.connect()
-            
             self.alarm.update_status()
-            #self.alarm.update_alarms()
-            #self.alarm.update_troubles()
-            #self.alarm.update_alerts()
             self.alarm.update_devices()
-
-            self._last_update = datetime.now()
         except Exception as ex:
-            _LOGGER.error('Update failed: %s', ex)
-            raise
+            # Token may have been invalidated (e.g. after a network blip).
+            # Reconnect and retry once before giving up.
+            _LOGGER.warning('Update failed (%s); reconnecting and retrying', ex)
+            try:
+                self.alarm.connect()
+                self.alarm.update_devices()
+            except Exception as ex2:
+                _LOGGER.error('Update retry failed: %s', ex2)
+                raise
+
+        self._last_update = datetime.now()
 
     @property
     def name(self):
