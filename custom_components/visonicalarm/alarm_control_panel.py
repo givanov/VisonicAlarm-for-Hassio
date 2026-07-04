@@ -181,7 +181,10 @@ class VisonicAlarm(alarm.AlarmControlPanelEntity):
             if code != self._code:
                 pn.create(self._hass, 'You entered the wrong disarm code.', title='Disarm Failed')
                 return
-            
+
+        # Re-authenticate if needed so an expired session token doesn't make
+        # the command fail.
+        hub.ensure_logged_in()
         hub.alarm.disarm()
         sleep(1)
         self.update()
@@ -193,6 +196,10 @@ class VisonicAlarm(alarm.AlarmControlPanelEntity):
                 pn.create(self._hass, 'You entered the wrong arm code.', title='Arm Failed')
                 return
 
+        # Re-authenticate if needed so an expired session token doesn't make
+        # the command fail, and so the ready state below is checked against
+        # fresh status.
+        hub.ensure_logged_in()
         if hub.alarm.ready:
             hub.alarm.arm_home()
 
@@ -209,7 +216,11 @@ class VisonicAlarm(alarm.AlarmControlPanelEntity):
             if code != self._code:
                 pn.create(self._hass, 'You entered the wrong arm code.', title='Unable to Arm')
                 return
-            
+
+        # Re-authenticate if needed so an expired session token doesn't make
+        # the command fail, and so the ready state below is checked against
+        # fresh status.
+        hub.ensure_logged_in()
         if hub.alarm.ready:
             hub.alarm.arm_away()
 

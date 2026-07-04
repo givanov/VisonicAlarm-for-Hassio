@@ -110,6 +110,17 @@ class VisonicAlarmHub(Entity):
             _LOGGER.error('Connection failed: %s', ex)
             return False
 
+    def ensure_logged_in(self):
+        """ Re-authenticate only if the current session token is no longer
+        valid. The token can expire (e.g. after a network blip) and any call
+        made while logged out will fail, so we log in again before using it. """
+        try:
+            if self.alarm.is_token_valid:
+                return
+        except Exception as ex:
+            _LOGGER.info('Token validity check failed (%s); reconnecting', ex)
+        self.alarm.connect()
+
     @property
     def last_update(self):
         """ Return the last update timestamp. """
@@ -118,20 +129,11 @@ class VisonicAlarmHub(Entity):
     @Throttle(timedelta(seconds=10))
     def update(self):
         """ Update all alarm statuses. """
-        try:
-            self.alarm.update_status()
-            self.alarm.update_devices()
-        except Exception as ex:
-            # Token may have been invalidated (e.g. after a network blip).
-            # Reconnect and retry once before giving up.
-            _LOGGER.warning('Update failed (%s); reconnecting and retrying', ex)
-            try:
-                self.alarm.connect()
-                self.alarm.update_devices()
-            except Exception as ex2:
-                _LOGGER.error('Update retry failed: %s', ex2)
-                raise
-
+        # Re-authenticate first if the session token has expired, so the
+        # status calls below don't fail after we've been logged out.
+        self.ensure_logged_in()
+        self.alarm.update_status()
+        self.alarm.update_devices()
         self._last_update = datetime.now()
 
     @property
